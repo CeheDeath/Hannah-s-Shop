@@ -1,0 +1,357 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Shop guide</title>
+<style>body{font:16px/1.65 system-ui,Segoe UI,sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#0F1233;background:#F4F3FA}
+h1,h2,h3{letter-spacing:-.02em;line-height:1.15}h1{font-size:2.2rem}h2{margin-top:2.2em;border-bottom:2px solid #2230C9;padding-bottom:6px}
+table{border-collapse:collapse;width:100%;margin:1em 0;background:#fff;font-size:.93rem}th,td{border:1px solid #D9DAEA;padding:8px 10px;text-align:left;vertical-align:top}th{background:#ECEDF8}
+code,pre{background:#E7E8F6;border-radius:6px}code{padding:1px 6px;font-size:.9em}pre{padding:14px;overflow:auto}pre code{padding:0;background:none}
+blockquote{border-left:4px solid #FF5B3A;margin:1em 0;padding:4px 16px;background:#fff}a{color:#2230C9}</style></head><body><h1 id="your-online-shop-the-plain-english-guide">Your online shop: the plain-English guide</h1>
+<p><em>Written for the shop owner. No coding knowledge needed to follow it.</em></p>
+<p><strong>What you are getting:</strong> a fast, good-looking clothing shop where anyone can browse and fill a cart, shoppers must sign in (and give a delivery location) to order, and you get a private admin panel to see new orders, change stock and upload product photos. It can run on <strong>free hosting</strong>.</p>
+<p><strong>Contents</strong>
+- Part A: What I built, and why I built it this way
+- Part B: Try it right now (2 minutes, nothing to install)
+- Part C: Putting it online for free, step by step
+- Part D: The files you may need to edit
+- Part E: How the shop is protected
+- Part F: Running the shop day to day
+- Part G: Honest limits, costs and risks
+- Part H: What I would add next</p>
+<hr />
+<h2 id="part-a-what-i-built-and-why">Part A: What I built, and why</h2>
+<h3 id="the-look">The look</h3>
+<p>A confident, modern boutique style, deliberately different from the usual cream-and-brown "fashion template":
+- <strong>Cobalt blue</strong> (the brand colour) with a warm <strong>price-tag orange</strong> used only for small accents (cart count, price sticker, "from $x" badge).
+- Large, bold headline type, rounded buttons, and a collage of product cards in the hero area.
+- Every product has a <strong>soft-coloured illustrated picture</strong> (I drew all eight myself, so there are no licensing worries). When you upload your own photos in the admin panel, they replace the drawings automatically.
+- Works on phones, tablets and computers.</p>
+<h3 id="what-each-type-of-visitor-can-do">What each type of visitor can do</h3>
+<table>
+<thead>
+<tr>
+<th>Who</th>
+<th>Can do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anyone</strong> (no account)</td>
+<td>Browse, search, filter by category, open product details, use the cart (it updates the total instantly)</td>
+</tr>
+<tr>
+<td><strong>Customer</strong> (signed in)</td>
+<td>Everything above, plus place an order. They must give a phone number, address and choose a <strong>delivery area</strong>. If their area isn't on your list, the order button is blocked and they are told why. They can also see their order history and status</td>
+</tr>
+<tr>
+<td><strong>You, the admin</strong></td>
+<td>See <strong>pending orders</strong> (with a counter), confirm / update / cancel them, add or edit products, change stock and prices, <strong>upload photos</strong>, and control which <strong>delivery areas</strong> you serve and their fees</td>
+</tr>
+</tbody>
+</table>
+<p><strong>One login for everyone.</strong> There is only one "Sign in" page. After the password is checked, the system looks you up and decides: shop owner goes to the admin panel, shoppers go to the shop. Nobody can create an admin account through the website.</p>
+<h3 id="the-big-decisions-i-made-and-the-reasons">The big decisions I made (and the reasons)</h3>
+<p><strong>1. No traditional web server to look after.</strong>
+A classic shop needs a rented server running PHP or similar, which costs money every month and needs updates and security patching. I chose a modern setup instead:
+- The <strong>website itself</strong> is plain files (pages, styles, pictures). Any free "static hosting" company can serve these, quickly and securely.
+- The <strong>database, logins and photo storage</strong> come from <strong>Supabase</strong>, a service with a generous free plan.</p>
+<p>Result: <strong>free to run</strong>, nothing to patch, and the free host also gives you HTTPS (the padlock).</p>
+<p><strong>2. Security lives in the database, not just in the website.</strong>
+Many beginner shops hide the admin button and hope nobody finds the admin URL. That is not security. Here, the <strong>database itself</strong> refuses to show or change anything the signed-in person isn't allowed to. A shopper who tampers with the website's code still gets "permission denied". Details in Part E.</p>
+<p><strong>3. The server decides prices, not the browser.</strong>
+The cart in the browser only remembers "product 4, size M, quantity 2". When an order is placed, the database looks up the <strong>real price and stock itself</strong>. Editing the page to make a coat cost $1 does nothing.</p>
+<p><strong>4. Demo mode first.</strong>
+Before connecting anything, the shop runs fully in your browser with sample data and two demo accounts. You can try the whole customer and admin experience in two minutes and decide what you want changed <em>before</em> we spend time on setup.</p>
+<p><strong>5. One settings file.</strong>
+Everything a shop owner normally changes (name, tagline, currency, contact details) is in <strong>one</strong> small file: <code>js/config.js</code>.</p>
+<h3 id="how-it-is-put-together-a-simple-picture">How it is put together (a simple picture)</h3>
+<pre><code>Shopper's phone/computer
+   |  opens the website files (free host: Cloudflare Pages or Netlify)
+   |
+   +--&gt; talks to SUPABASE (free plan)
+          - Login system (passwords stored safely, never readable)
+          - Database: products, orders, delivery areas
+          - Photo storage (public to view, admins-only to upload)
+          - Security rules + two guarded &quot;functions&quot;: place an order, change order status
+</code></pre>
+<h3 id="what-is-in-the-folder">What is in the folder</h3>
+<pre><code>marlowe-shop/
+  index.html          the page shell (rarely edited)
+  _headers            security instructions for the free host (don't edit)
+  css/style.css       colours and fonts
+  js/config.js        &lt;-- YOUR SETTINGS (the only file most owners ever edit)
+  js/app.js           core: login, cart, menu
+  js/shop.js          shop, product pop-up, checkout, my orders
+  js/admin.js         the admin panel
+  js/store-demo.js    demo mode (data in your browser)
+  js/store-supabase.js live mode (real database)
+  img/products/       the 8 sample product pictures
+  supabase/setup.sql  one-time database setup (you paste it once)
+  docs/GUIDE.md       this guide
+</code></pre>
+<hr />
+<h2 id="part-b-try-it-right-now-no-installation-no-internet-account">Part B: Try it right now (no installation, no internet account)</h2>
+<ol>
+<li>Unzip the folder.</li>
+<li><strong>Double-click <code>index.html</code>.</strong> It opens in your browser.</li>
+<li>Look around as a visitor: open a product, pick a size, add to cart, change quantities.</li>
+<li>Click <strong>Sign in</strong> and use the demo buttons:</li>
+<li><strong>Admin:</strong> <code>admin@demo.test</code> / <code>demo1234</code>. You will land in the admin panel.</li>
+<li><strong>Customer:</strong> <code>customer@demo.test</code> / <code>demo1234</code> (or create your own account).</li>
+<li>Place an order as a customer, then sign out, sign in as admin, and you'll see it under <strong>Pending orders</strong>. Confirm it, add a product with a photo, switch a delivery area off.</li>
+</ol>
+<blockquote>
+<p><strong>Important:</strong> in demo mode everything is saved only in <em>your</em> browser, and the demo passwords are not secured. It's a rehearsal stage, not the real shop. The orange banner at the top reminds you. It disappears automatically when you connect the real database (Part C).</p>
+</blockquote>
+<hr />
+<h2 id="part-c-putting-it-online-for-free-step-by-step">Part C: Putting it online for free, step by step</h2>
+<p>You need: a free <strong>Supabase</strong> account, a free <strong>Cloudflare</strong> account (or Netlify), and about 30 to 45 minutes the first time. You'll copy and paste; you won't write code.</p>
+<h3 id="c1-create-the-database-supabase">C1. Create the database (Supabase)</h3>
+<ol>
+<li>Go to <strong>supabase.com</strong>, sign up (free), and click <strong>New project</strong>.</li>
+<li>Give it a name (e.g. <code>my-shop</code>), choose a <strong>strong database password</strong> (save it in a password manager), pick the region closest to your customers, and create it. Wait a minute or two.</li>
+<li>In the left menu open <strong>SQL Editor</strong> &gt; <strong>New query</strong>.</li>
+<li>Open the file <code>supabase/setup.sql</code> in Notepad, <strong>select everything and copy</strong>, paste it into the SQL Editor, and press <strong>Run</strong>. You should see "Success". (Running it twice is harmless.)</li>
+<li>In the left menu open <strong>Authentication</strong> &gt; <strong>Sign In / Providers</strong> (the name may differ slightly) and:</li>
+<li>Set <strong>minimum password length to 8</strong>.</li>
+<li>Decide on <strong>Confirm email</strong>: <em>ON</em> is safer for a real shop (shoppers must click a link in their email, which blocks fake sign-ups). <em>OFF</em> is easier while you're testing. Supabase's built-in email sender is limited in how many emails it sends, so for a busy shop later you would connect your own email service.</li>
+<li>Open <strong>Project Settings</strong> &gt; <strong>API</strong>. Copy two things:</li>
+<li><strong>Project URL</strong> (looks like <code>https://abcdxyz.supabase.co</code>)</li>
+<li>The <strong>anon / publishable key</strong> (a long text). <strong>Never</strong> copy the one called <code>service_role</code>; it's a master key.</li>
+</ol>
+<h3 id="c2-connect-the-website-to-the-database">C2. Connect the website to the database</h3>
+<ol>
+<li>Open <code>js/config.js</code> in Notepad.</li>
+<li>Paste your Project URL and anon key between the quotation marks, and set your shop name, tagline and currency symbol. Save.</li>
+<li>Open <code>index.html</code> by double-click again: the orange demo banner should be gone. You are now talking to your real database.</li>
+</ol>
+<h3 id="c3-put-the-website-online-free">C3. Put the website online (free)</h3>
+<p><strong>Option 1: Cloudflare Pages</strong> (what I'd use)
+1. Sign up at <strong>cloudflare.com</strong> (free).
+2. In the dashboard choose <strong>Workers &amp; Pages</strong> &gt; <strong>Create</strong> &gt; <strong>Pages</strong> &gt; <strong>Upload assets</strong> (direct upload, no GitHub or coding needed).
+3. Name the project (e.g. <code>my-shop</code>), then <strong>drag the whole <code>marlowe-shop</code> folder</strong> (the contents, with <code>index.html</code> at the top level) into the upload box and click <strong>Deploy</strong>.
+4. In a minute you get a free address like <code>my-shop.pages.dev</code>. HTTPS (the padlock) is automatic.
+   <em>Cloudflare changes its dashboard wording from time to time. If a button is named differently, look for "Pages" and "Direct Upload".</em></p>
+<p><strong>Option 2: Netlify.</strong> Go to <strong>app.netlify.com/drop</strong> and drag the folder onto the page. Free address and HTTPS, same idea.</p>
+<blockquote>
+<p>Avoid GitHub Pages for this project. It cannot apply the <code>_headers</code> security file, which is one of the protections in Part E.</p>
+</blockquote>
+<h3 id="c4-tell-supabase-your-websites-address">C4. Tell Supabase your website's address</h3>
+<p>In Supabase: <strong>Authentication</strong> &gt; <strong>URL Configuration</strong>. Set <strong>Site URL</strong> to your new address (e.g. <code>https://my-shop.pages.dev</code>). This makes the email confirmation links return to your shop.</p>
+<h3 id="c5-make-yourself-the-admin">C5. Make yourself the admin</h3>
+<ol>
+<li>Open your live shop, click <strong>Sign in</strong> &gt; <strong>Create account</strong>, and register with <strong>your</strong> email (confirm the email if you left that option on).</li>
+<li>Back in Supabase <strong>SQL Editor</strong>, paste this one line with <em>your</em> email and press <strong>Run</strong>:
+   <code>sql
+   update public.profiles set role = 'admin' where email = 'you@example.com';</code></li>
+<li>Sign out and sign in again on the shop. You'll be taken to the admin panel.</li>
+</ol>
+<h3 id="c6-make-it-yours">C6. Make it yours</h3>
+<p>Sign in as admin and:
+- <strong>Delivery areas:</strong> replace the three sample areas with your real ones and fees.
+- <strong>Products:</strong> edit or delete the sample products, upload your real photos. Tall (portrait) photos look best; large photos are shrunk automatically.
+- Place a test order from a second account and confirm it. Then cancel it and check the stock returned.</p>
+<h3 id="c7-your-own-domain-name-optional-not-free">C7. Your own domain name (optional, not free)</h3>
+<p><code>my-shop.pages.dev</code> works fine for starting. A custom domain like <code>yourshop.com</code> costs roughly the price of a yearly registration (typically around ten dollars or the local equivalent) and can be attached in Cloudflare Pages &gt; Custom domains. After that, update the <strong>Site URL</strong> in step C4.</p>
+<h3 id="free-plan-facts-to-know-checked-at-the-time-of-writing">Free-plan facts to know (checked at the time of writing)</h3>
+<ul>
+<li><strong>Supabase free plan:</strong> about 500 MB database and 1 GB file storage, which is plenty for hundreds of products and thousands of orders. <strong>Free projects are paused after about a week without activity</strong> (you can restore them in one click, but a paused shop is a dead shop). There are <strong>no automatic backups</strong> on the free plan.</li>
+<li><strong>Cloudflare Pages free plan:</strong> unlimited static requests/bandwidth for a site like this. Limits apply to things like file count and file size, which this small site won't approach.</li>
+<li>Plans and limits change. Re-check the current plan pages before you launch.</li>
+</ul>
+<hr />
+<h2 id="part-d-the-files-you-may-need-to-edit">Part D: The files you may need to edit</h2>
+<table>
+<thead>
+<tr>
+<th>You want to...</th>
+<th>Edit this file</th>
+<th>What to change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Change shop name, tagline, currency, WhatsApp or email</td>
+<td><code>js/config.js</code></td>
+<td>The text between quotation marks</td>
+</tr>
+<tr>
+<td>Connect the real database</td>
+<td><code>js/config.js</code></td>
+<td>Paste the Supabase URL and anon key (Part C2)</td>
+</tr>
+<tr>
+<td>Change brand colours</td>
+<td><code>css/style.css</code></td>
+<td>The block at the top called <code>1. TOKENS</code>: change the colour codes like <code>#2230C9</code></td>
+</tr>
+<tr>
+<td>Change the font</td>
+<td><code>css/style.css</code> and <code>index.html</code></td>
+<td>The <code>--font</code> line, and the Google Fonts link in <code>index.html</code></td>
+</tr>
+<tr>
+<td>Add/edit products, photos, stock, delivery areas</td>
+<td><strong>No file.</strong> Use the admin panel</td>
+<td></td>
+</tr>
+<tr>
+<td>Change the headline on the home page</td>
+<td><code>js/config.js</code></td>
+<td><code>TAGLINE</code></td>
+</tr>
+<tr>
+<td>Change starting sample data</td>
+<td><code>supabase/setup.sql</code> (before running)</td>
+<td>Or just use the admin panel afterwards</td>
+</tr>
+<tr>
+<td>Change the favicon/browser-tab icon</td>
+<td><code>img/favicon.svg</code></td>
+<td>Replace with your own logo file</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Files you should <em>not</em> touch:</strong> <code>_headers</code>, <code>supabase/setup.sql</code> after it's been run, and everything in <code>js/</code> except <code>config.js</code>. If you want something changed there, ask your developer.</p>
+<p>After editing any file, <strong>upload the folder again</strong> to Cloudflare/Netlify (drag and drop, as in C3). Changes show up in a minute. Photos and products added through the admin panel do <em>not</em> need re-uploading; they go straight to the database.</p>
+<hr />
+<h2 id="part-e-how-the-shop-is-protected">Part E: How the shop is protected</h2>
+<h3 id="logins">Logins</h3>
+<ul>
+<li><strong>Passwords are never stored as text.</strong> Supabase stores only a scrambled form (a salted hash), so even with full database access nobody can read anyone's password. <em>I never see or store passwords either.</em></li>
+<li>Passwords must be 8+ characters with a letter and a number.</li>
+<li>Repeated wrong passwords are throttled by Supabase's built-in rate limits.</li>
+<li>Sessions are managed by Supabase with automatically renewing tokens, and "Sign out" ends the session.</li>
+<li>The error for a wrong login never says whether the email exists.</li>
+<li><strong>Admin accounts cannot be created from the website.</strong> Everyone who registers is a customer; only you can promote an account, with the SQL line in C5.</li>
+</ul>
+<h3 id="who-may-see-or-change-what-the-key-protection">Who may see or change what (the key protection)</h3>
+<p>The database has <strong>Row Level Security</strong> switched on for every table. In plain words:
+- Shoppers see only <strong>active</strong> products and <strong>active</strong> delivery areas.
+- A customer can read <strong>only their own</strong> orders and profile. Other customers' data does not exist as far as they are concerned.
+- <strong>Nobody can write to the orders table directly.</strong> Orders are created and changed only through two guarded functions (below).
+- Only an admin can add/edit/delete products and delivery areas, or upload pictures.
+- A customer <strong>cannot change their own role</strong> to admin: the database blocks that column from editing.
+- Even if an attacker opened the browser console and called the database directly, these rules still apply. They're enforced <strong>on the server</strong>.</p>
+<h3 id="the-two-guarded-functions">The two guarded functions</h3>
+<ol>
+<li><strong>Place order.</strong> The browser sends only product, size and quantity. The database then checks the person is signed in and not an admin, checks the phone and address, <strong>checks the delivery area exists and is switched on</strong>, locks each product while it checks stock, uses the <strong>real price from the database</strong>, subtracts the stock, and saves everything in one all-or-nothing step. It also limits each account to 5 pending orders so someone can't flood you with fake ones.</li>
+<li><strong>Change order status</strong> (admin only). Cancelling puts the items back in stock automatically.</li>
+</ol>
+<h3 id="attacks-and-what-stops-them">Attacks and what stops them</h3>
+<table>
+<thead>
+<tr>
+<th>Attack (plain words)</th>
+<th>Protection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Changing the price in the browser</td>
+<td>Prices are re-read from the database when ordering</td>
+</tr>
+<tr>
+<td>Pretending to be an admin</td>
+<td>Role is stored server-side; admin actions are checked by the database each time</td>
+</tr>
+<tr>
+<td>Seeing other people's orders/addresses</td>
+<td>Row Level Security: you only get your own rows</td>
+</tr>
+<tr>
+<td>Injecting code through a product name or address (XSS)</td>
+<td>All text is escaped before being displayed; and a Content-Security-Policy tells browsers to run only our own scripts. <em>(I tested a product named with script code; it displays as harmless text.)</em></td>
+</tr>
+<tr>
+<td>SQL injection</td>
+<td>No hand-written database queries from the browser; the library and database functions use safe parameters</td>
+</tr>
+<tr>
+<td>Malicious file upload</td>
+<td>Only admins can upload; the storage bucket accepts only JPG/PNG/WEBP up to 3 MB; photos are re-drawn in the browser first, which also strips hidden camera/location data</td>
+</tr>
+<tr>
+<td>Two people buying the last item</td>
+<td>Stock is locked during checkout</td>
+</tr>
+<tr>
+<td>Fake bulk orders</td>
+<td>Max 5 pending orders per account; only signed-in customers may order</td>
+</tr>
+<tr>
+<td>Open redirect (login links that send people to evil sites)</td>
+<td>After login, only a fixed list of internal pages is allowed</td>
+</tr>
+<tr>
+<td>Embedding your shop inside a fake page (clickjacking)</td>
+<td><code>X-Frame-Options</code> and CSP <code>frame-ancestors</code></td>
+</tr>
+<tr>
+<td>Man-in-the-middle snooping</td>
+<td>HTTPS everywhere; HSTS header tells browsers to insist on it</td>
+</tr>
+<tr>
+<td>Leaked secret keys</td>
+<td>Only the <strong>public</strong> anon key is in the site. The master <code>service_role</code> key is never used</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-you-must-do-to-stay-safe">What <em>you</em> must do to stay safe</h3>
+<ul>
+<li>Use a <strong>long, unique password</strong> for your admin account and for Supabase and Cloudflare logins; switch on two-factor authentication on both.</li>
+<li>Never paste the <code>service_role</code> key anywhere.</li>
+<li>Keep <strong>Confirm email</strong> switched on once you have real customers.</li>
+<li>Don't share your admin account. If someone leaves, change the password.</li>
+<li><strong>Export your data</strong> regularly (see Part F).</li>
+</ul>
+<h3 id="honest-security-limits">Honest security limits</h3>
+<ul>
+<li>Without a paid plan there are no automatic backups. Export them yourself.</li>
+<li>Supabase's free email sender is meant for testing; connect a proper email service before a big launch.</li>
+<li>There is no CAPTCHA on sign-up. If you receive bot sign-ups, ask your developer to add one (Supabase supports it).</li>
+<li>The CDN-hosted library (<code>supabase-js</code>) is loaded from jsDelivr at a pinned version. A stricter setup would download and host that file yourself.</li>
+</ul>
+<hr />
+<h2 id="part-f-running-the-shop-day-to-day">Part F: Running the shop day to day</h2>
+<p><strong>Daily:</strong> open <code>your-site/#/admin</code>, sign in, check <strong>Pending orders</strong>. The red counter shows how many wait. The list refreshes itself about every 45 seconds while open. For each order you'll see the customer's phone (tap to call), the area, address, landmark and a <strong>map link</strong> if they shared their location. Press <strong>Confirm order</strong>, then later change the status to <strong>Out for delivery</strong> and <strong>Delivered</strong>.</p>
+<p><strong>Adding stock:</strong> Admin &gt; Products &gt; Edit &gt; change the <em>Stock</em> number &gt; Save.
+<strong>Hiding an item</strong> (seasonal, out of stock for good): Edit &gt; untick "Show in the shop". It stays in your records.
+<strong>New area:</strong> Admin &gt; Delivery areas &gt; Add an area with its fee. Switch off any area you can't serve at the moment.
+<strong>Backup / export (weekly):</strong> in Supabase &gt; <strong>Table Editor</strong>, open <code>orders</code>, <code>order_items</code> and <code>products</code> and use the <strong>Export</strong> button (CSV). Save the files somewhere safe.
+<strong>Keep the shop awake (free plan):</strong> if nobody visits for about a week, Supabase pauses a free project. Either visit your shop weekly, or set up a free uptime monitor that opens your shop's product list on a schedule. When the shop starts earning, the paid plan removes this problem and adds daily backups.</p>
+<hr />
+<h2 id="part-g-honest-limits-costs-and-risks">Part G: Honest limits, costs and risks</h2>
+<ul>
+<li><strong>Cost to start:</strong> $0 (domain name optional).</li>
+<li><strong>No online payment yet.</strong> Checkout says "pay on delivery". That's deliberate for a first version: payments need a business account with a payment provider, and the order must only be marked as paid after the provider confirms it to the server. This can be added later.</li>
+<li><strong>No automatic emails/SMS</strong> to customers. You confirm by phone or WhatsApp (put your number in <code>config.js</code> and a WhatsApp link appears in the footer and checkout).</li>
+<li><strong>Delivery check is by named area</strong>, not by map distance. Locations shared by customers are saved for the rider but don't automatically accept or refuse an order.</li>
+<li><strong>One picture per product.</strong></li>
+<li><strong>Free-plan pausing and no backups</strong> (Part C and F).</li>
+<li><strong>Testing status, so you know exactly what was verified:</strong></li>
+<li>✅ <strong>Tested in a real browser:</strong> the whole shop and admin experience in demo mode: browsing, cart maths, sign-up rules, login routing (admin vs customer), delivery-area blocking, placing and confirming orders, cancelling and restocking, product and photo upload, rejecting a fake image, and showing script code as harmless text. No script or security-policy errors.</li>
+<li>⚠️ <strong>Not yet tested live:</strong> I had no internet access in my build environment, so the Supabase connection and <code>setup.sql</code> have <strong>not</strong> been run against a real Supabase project. The code follows Supabase's documented methods, and demo mode mirrors the same rules, but expect to spend a few minutes on a first-run check. Do the checklist below and send me any error text.</li>
+</ul>
+<h3 id="first-run-checklist-after-part-c">First-run checklist (after Part C)</h3>
+<ul>
+<li>[ ] The shop opens with no orange banner and shows the 8 sample products</li>
+<li>[ ] You can register; (if email confirm is ON) the email arrives and you can sign in</li>
+<li>[ ] After the SQL line in C5, signing in takes you to the admin panel</li>
+<li>[ ] A second account (private window) can order; it shows as Pending for you</li>
+<li>[ ] Cancelling an order puts stock back</li>
+<li>[ ] Uploading a product photo works and shows in the shop</li>
+<li>[ ] As a customer, <code>#/admin</code> sends you back to the shop</li>
+<li>[ ] Choosing "My area is not listed" blocks ordering</li>
+</ul>
+<p><strong>If something fails:</strong> note the exact message, and check Supabase &gt; <strong>Logs</strong> (and the browser's developer console). Common causes: a typo in the URL/key in <code>config.js</code>, the whole <code>setup.sql</code> not being pasted, or the "confirm email" setting.</p>
+<hr />
+<h2 id="part-h-what-id-build-next-in-order-of-value">Part H: What I'd build next (in order of value)</h2>
+<ol>
+<li><strong>Order notification</strong> to you (email or WhatsApp) the moment an order arrives.</li>
+<li><strong>Mobile-money / card payments</strong> with server-side confirmation.</li>
+<li><strong>Multiple photos</strong> per product and a zoom gallery.</li>
+<li><strong>Customer can cancel</strong> while an order is still pending.</li>
+<li><strong>Sales report</strong> page (daily and monthly totals, best sellers).</li>
+<li><strong>Distance-based delivery fees</strong> using the shop's coordinates.</li>
+<li><strong>Discount codes</strong> and a "New / Sale" badge.</li>
+</ol>
+<hr />
+<p><em>Questions you may have: "Can I change the design completely?" Yes, the look is all in <code>css/style.css</code>. "Can it be moved off the free services later?" Yes. The data is standard Postgres and can be exported and moved to any host if the shop grows.</em></p></body></html>

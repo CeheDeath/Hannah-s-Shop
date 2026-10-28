@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img">
+<defs><linearGradient id="sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".14"/></linearGradient></defs>
+<rect width="600" height="800" fill="#EAD9FF"/>
+<circle cx="300" cy="400" r="250" fill="#fff" opacity=".35"/>
+<ellipse cx="300" cy="712" rx="190" ry="16" fill="#0F1233" opacity=".12"/>
+<path d="M232 336 C232 150 368 150 368 336" fill="none" stroke="#2230C9" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><path d="M168 322 H432 L456 700 H144 Z" fill="#F1E3C8" stroke="#B49A6B" stroke-width="3" stroke-linejoin="round"/><path d="M168 322 H432 L456 700 H144 Z" fill="url(#sheen)" /><path d="M159 452 H441 L444 508 H156 Z" fill="#2230C9" opacity=".92"/><path d="M236 566 H364 V660 H236 Z" fill="#E5D3AE" stroke="#B49A6B" stroke-width="3" stroke-linejoin="round"/><path d="M236 566 H364 V660 H236 Z" fill="url(#sheen)" /><path d="M178 348 H422" fill="none" stroke="#B49A6B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" stroke-dasharray="7 7"/><path d="M244 574 H356" fill="none" stroke="#B49A6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7" stroke-dasharray="5 5"/>
+</svg>

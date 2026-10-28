@@ -1,0 +1,11 @@
+MARLOWE SHOP - START HERE
+=========================
+1. Double-click  index.html  to try the shop right now (demo mode).
+   Admin demo login:    admin@demo.test    /  demo1234
+   Customer demo login: customer@demo.test /  demo1234
+
+2. Read  docs/GUIDE.html  (double-click it). It explains everything:
+   what the shop does, how to put it online for free, which files to edit,
+   and how the shop is protected.
+
+3. The only file most owners ever edit:  js/config.js
