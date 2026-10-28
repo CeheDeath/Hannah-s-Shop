@@ -1,0 +1,7 @@
+wrangler.jsonc
+.assetsignore
+docs
+supabase
+START-HERE.txt
+.git
+node_modules
